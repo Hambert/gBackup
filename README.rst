@@ -17,11 +17,12 @@ Use
 
 optional arguments:
 
--h, --help                         Show this help message and exit
--p PATH, --path PATH               Path in which the files to be backed up are located.
---debug                            Debug mode
--b, --backup                       Start backup
--d <FileID>, --download <FileID>   Download a single file with the given FileID
--l, --list                         List remote files
---delete                           Delete all remotefiles
+-h, --help                            Show this help message and exit
+-p PATH, --path PATH                  Path in which the files to be backed up are located
+--debug                               Debug mode
+-b, --backup                          Start backup
+-d <FileID>, --download <FileID>      Download a single file with the given FileID
+-l, --list                            List remote files
+--delete                              Delete all remotefiles
+
 
