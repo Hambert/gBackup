@@ -66,9 +66,14 @@ def main(args):
 
     # Liste aus datei lesen
     if args.path != None:
-        actualFiles = mySearch.serarchFile(args.path)
-    else:
-        actualFiles = None
+        if args.all != None:
+            actualFiles = mySearch.serarchFile(args.path)
+        else:
+            fileList = os.listdir(args.path)
+            actualFiles = []
+            for file in fileList:
+                actualFiles.append([file, os.path.getmtime(args.path + "/" + file) ])
+
 
     # Liste aktualisieren
     if args.debug and actualFiles:
@@ -284,6 +289,7 @@ def downloadFile(lc_service, fileID, path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This is a backup tool for Google Drive')
     parser.add_argument('-p', '--path', help='Path in which the files to be backed up are located.')
+    parser.add_argument('-a', '--all', help='Backup all files')
     parser.add_argument('--debug', help='Debug mode', action='store_true')
     parser.add_argument('-b','--backup', help='start backup', action='store_true')
     parser.add_argument('-d','--download', help='Download a single file with the given FileID')
