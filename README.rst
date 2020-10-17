@@ -11,6 +11,10 @@ Install
 ----------
 pip3 install -r requirements.txt
 
+Create a ``credentials.json`` with your Google account. Go to this page `Link <https://developers.google.com/drive/api/v3/quickstart/python>`_  and click the "Enable the Drive API" button.
+
+Copy the downloaded file in the main script main directory.
+
 Use
 ---
 ``python3 drive.py [-h] [-p PATH] [--debug] [-b] [-d DOWNLOAD] [-l] [--delete]``
