@@ -1,5 +1,6 @@
 # filehandling
 import os.path
+import pathlib 
 
 # Google API
 import pickle
@@ -185,7 +186,7 @@ def main(args):
         logging.debug("Download the file %s" % args.download)
         print("Download the file %s" % args.download)
         fileName = downloadFile(lc_service = service,fileID = args.download,path = args.path )
-        if fileName is not None:
+        if fileName is not None and fileName[-3:] == 'enc':
             myCrypto2.decrypt_file( args.path + "/" + fileName, args.path + "/" + fileName[:-4], key)
             os.remove(args.path + "/" + fileName)
 
@@ -267,11 +268,13 @@ def downloadFile(lc_service, fileID, path):
     fileName : str
      """
     file = lc_service.files().get(fileId=fileID).execute()
-    fileName = file['name']
+    fileName = file['name'].replace(" ","_").replace("\n","")
 
     request = lc_service.files().get_media(fileId=fileID)
-    
-    fh = io.FileIO( path + '/' + fileName, 'wb')
+    fullPath = path + os.path.sep + fileName
+    print(fullPath)
+
+    fh = io.FileIO( fullPath, 'wb')
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     try:
