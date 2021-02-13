@@ -45,20 +45,29 @@ def main(args):
     # created automatically when the authorization flow completes for the first
     # time.
     if os.path.exists('token.pickle'):
+
         with open('token.pickle', 'rb') as token:
             creds = pickle.load(token)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server()
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
+    
+    if os.path.exists('credentials.json'):
 
-    service = build('drive', 'v3', credentials=creds)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                creds = flow.run_local_server()
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
+    else:
+        debug.error('no credentials.json found')
+        print('login to google developer and create a credentials.json file')
+        return
+
+    service = build('drive', 'v3', cache_discovery=False, credentials=creds)
 
     # listFiles(service)
     # uploadFile(service)
@@ -75,10 +84,9 @@ def main(args):
             for file in fileList:
                 actualFiles.append([file, os.path.getmtime(args.path + "/" + file) ])
 
-
-    # Liste aktualisieren
-    if args.debug and actualFiles:
-        print(actualFiles)
+        if args.debug and actualFiles:
+            print('local files:')
+            print(actualFiles)
 
     if args.list:
         onlineFilelist = listFiles(service)
@@ -183,12 +191,18 @@ def main(args):
                     print("Fehler beim löschen der Datei: " + str(delFile) )
 
     elif args.download != None:
-        logging.debug("Download the file %s" % args.download)
-        print("Download the file %s" % args.download)
-        fileName = downloadFile(lc_service = service,fileID = args.download,path = args.path )
-        if fileName is not None and fileName[-3:] == 'enc':
-            myCrypto2.decrypt_file( args.path + "/" + fileName, args.path + "/" + fileName[:-4], key)
-            os.remove(args.path + "/" + fileName)
+        
+        if args.path == None:
+            logging.error("no given path")
+            print("Parameter path is missing")
+        else:
+            logging.debug("Download the file %s" % args.download)
+            print("Download the file %s" % args.download)
+            fileName = downloadFile(lc_service = service,fileID = args.download,path = args.path )
+            if fileName is not None and fileName[-3:] == 'enc':
+                myCrypto2.decrypt_file( args.path + "/" + fileName, args.path + "/" + fileName[:-4], key)
+                os.remove(args.path + "/" + fileName)
+
 
 def listFiles(lc_service):
     # Call the Drive v3 API
@@ -272,7 +286,6 @@ def downloadFile(lc_service, fileID, path):
 
     request = lc_service.files().get_media(fileId=fileID)
     fullPath = path + os.path.sep + fileName
-    print(fullPath)
 
     fh = io.FileIO( fullPath, 'wb')
     downloader = MediaIoBaseDownload(fh, request)
